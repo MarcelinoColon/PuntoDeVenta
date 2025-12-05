@@ -1,5 +1,7 @@
 <Solution>
   <Project Path="Application/Application.csproj" />
+  <Project Path="Backend/Backend.csproj" Id="e37beca7-7db4-4d94-a622-573d8ee3e16b" />
+  <Project Path="ConsoleApp/ConsoleApp.csproj" />
   <Project Path="Data/Data.csproj" />
   <Project Path="Domain/Domain.csproj" />
   <Project Path="Repository/Repository.csproj" />

@@ -1,0 +1,30 @@
+@Backend_HostAddress = http://localhost:5022
+
+GET {{Backend_HostAddress}}/test/
+Accept: application/json
+
+###
+
+GET {{Backend_HostAddress}}/brand/
+
+###
+
+POST {{Backend_HostAddress}}/brand/
+Content-Type: application/json
+
+{
+  "name": "Contry Club"
+}
+
+###
+
+PUT {{Backend_HostAddress}}/brand/4
+Content-Type: application/json
+
+{
+  "name": "Contry Club editado"
+}
+
+###
+
+DELETE {{Backend_HostAddress}}/brand/4

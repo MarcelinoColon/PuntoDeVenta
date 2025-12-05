@@ -23,6 +23,10 @@ namespace Domain.Entities
             }
         }
 
+        public BrandEntity()
+        {
+        }
+
         public BrandEntity(string name)
         {
             Name = name;
