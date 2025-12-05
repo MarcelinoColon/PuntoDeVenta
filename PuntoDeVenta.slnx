@@ -4,5 +4,6 @@
   <Project Path="ConsoleApp/ConsoleApp.csproj" />
   <Project Path="Data/Data.csproj" />
   <Project Path="Domain/Domain.csproj" />
+  <Project Path="Frontend/Frontend.csproj" Id="6ea7ba70-881a-4864-9543-7d1b192f90f8" />
   <Project Path="Repository/Repository.csproj" />
 </Solution>
