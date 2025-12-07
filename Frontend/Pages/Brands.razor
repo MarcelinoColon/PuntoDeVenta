@@ -1,0 +1,108 @@
+﻿@page "/brands"
+@using Frontend.Client
+@inject ApiClient Api
+@inject NavigationManager nav
+
+<h3>Marcas</h3>
+
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+else if(error is not null)
+{
+    <div class="alert alert-danger">
+        @error
+    </div>
+}else
+{
+    <EditForm Model="newBrand" OnValidSubmit="CreateAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row align-items-end">
+            <div class="col-auto">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control" @bind-Value="newBrand.Name"></InputText>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" disabled="@isBusy">Crear</button>
+            </div>
+        </div>
+    </EditForm>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th style="width: 220px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var brand in brands)
+            {
+                <tr>
+                    <td>@brand.Id</td>
+                    <td>@brand.Name</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary me-2" 
+                        @onclick='() => nav.NavigateTo($"/brands/edit/{brand.Id}/{brand.Name}")'>Editar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    string? error = null;
+    private IEnumerable<BrandEntity> brands = null;
+    private bool isLoading;
+    private bool isBusy;
+    private BrandEntity newBrand = new BrandEntity();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            error = null;
+            isLoading = true;
+            brands = await Api.GetbrandAsync();
+        } 
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        try
+        {
+            isBusy = true;
+            error = null;
+
+            await Api.AddbrandAsync(newBrand);
+            newBrand = new();
+            await LoadAsync();
+        }
+        catch(Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

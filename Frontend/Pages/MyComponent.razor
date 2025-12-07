@@ -1,0 +1,44 @@
+﻿@page "/mycomponent"
+@inject HttpClient Http
+
+<h3>Mi componente</h3>
+
+<p>Contador @count</p>
+<button class="btn btn-primary" @onclick="IncrementCount">
+    Incrementar
+</button>
+
+<input type="text" @bind="some" @bind:event="oninput"/>
+
+<p>El valor de some es: @some</p>
+
+<div>
+    @if(data == null)
+    {
+        <p>Cargando...</p>
+    }
+    else
+    {
+        <pre>@data</pre>
+    }
+</div>
+
+@code {
+    private string name = "Marcelino";
+
+    private int count = 0;
+
+    private string some = "algo";
+
+    private string? data;
+
+    private void IncrementCount()
+    {
+        count++;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(2000);
+        data = await Http.GetStringAsync("sample-data/people.json");
+    }
+}
