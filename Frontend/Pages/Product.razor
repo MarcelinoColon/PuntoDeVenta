@@ -1,7 +1,7 @@
 ﻿@page "/products"
 @using Frontend.Client
 @inject ApiClient Api
-@inject NavigationManager nav
+@inject NavigationManager Nav
 @inject IJSRuntime js
 
 <h3>Productos</h3>
@@ -12,6 +12,18 @@
 }
 else
 {
+
+    @if (error is not null)
+    {
+        <div class="alert alert-danger">
+            @error
+        </div>
+    }
+
+    <button class="btn btn-primary" @onclick='() => Nav.NavigateTo("/products/frmproduct")'>Crear Producto</button>
+
+    <hr />
+
     <table class="table">
         <thead>
             <tr>
@@ -21,7 +33,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach(var product in products)
+            @foreach (var product in products)
             {
                 <tr>
                     <td>@product.Id</td>

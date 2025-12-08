@@ -1,0 +1,93 @@
+﻿@page "/products/frmproduct"
+@using Frontend.Client
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+
+<h3>Producto</h3>
+
+@if (error is not null)
+{
+    <div class="alert alert-danger">
+        @error
+    </div>
+}
+
+<EditForm Model="productDto" OnValidSubmit="SaveAsync">
+
+    <div>
+        <InputNumber @bind-Value="productDto.Id" disabled hidden></InputNumber>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText class="form-control" @bind-Value="productDto.Name"></InputText>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Costo</label>
+        <InputNumber class="form-control" @bind-Value="productDto.Cost"></InputNumber>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Precio</label>
+        <InputNumber class="form-control" @bind-Value="productDto.Price"></InputNumber>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Activo</label>
+        <InputCheckbox @bind-Value="productDto.Active" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Marcas</label>
+        <InputSelect class="form-select" @bind-Value="productDto.BrandId">
+            <option>Sin marca</option>
+            @foreach (var brand in brands)
+            {
+                <option value="@brand.Id">@brand.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button class="btn btn-primary" disabled="@isBusy">Guardar</button>
+    <button class="btn btn-secondary ms-2" type="button" @onclick="Back">Volver</button>
+
+</EditForm>
+
+@code {
+    private bool isBusy;
+    private string? error;
+    private ProductDto productDto = new ProductDto();
+    private IEnumerable<BrandEntity> brands = new List<BrandEntity>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetBrands();
+    }
+
+    private async Task GetBrands()
+    => brands = await Api.GetbrandAsync();
+
+    private async Task SaveAsync()
+    {
+        try
+        {
+            isBusy = true;
+            error = null;
+
+            await Api.AddproductAsync(productDto);
+            Nav.NavigateTo("/products");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void Back() => Nav.NavigateTo("/products");
+}

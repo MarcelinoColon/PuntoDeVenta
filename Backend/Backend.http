@@ -43,9 +43,25 @@ POST {{Backend_HostAddress}}/product/
 Content-Type: application/json
 
 {
-  "name": "producto nuevo nuevo",
+  "name": "Coca cola 20ml",
   "cost": 10,
   "price": 50,
   "active": true,
   "brandId": 1
 }
+###
+
+PUT {{Backend_HostAddress}}/product/1
+Content-Type: application/json
+
+{
+  "name": "Coca cola 20ml actualizada",
+  "cost": 15,
+  "price": 50,
+  "active": true,
+  "brandId": 1
+}
+
+###
+
+DELETE {{Backend_HostAddress}}/product/1

@@ -19,7 +19,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<StoreContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("CasaDb"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddTransient<IRepository<BrandEntity>, BrandRepository>();
@@ -83,7 +83,7 @@ app.MapPost("brand", async (IUseCase<BrandEntity> useCase, BrandEntity brand) =>
         await useCase.AddAsync(brand);
         return Results.Created();
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         return Results.BadRequest(ex.Message);
     }
@@ -99,7 +99,7 @@ app.MapPut("brand/{id}", async (int id, BrandEntity brand, IUseCase<BrandEntity>
 
         await useCase.UpdateAsync(brandEntity);
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         return Results.BadRequest(ex.Message);
     }
@@ -157,11 +157,11 @@ app.MapPost("/product", async (ProductDto productDto, ICreateUseCase<ProductDto,
         await useCase.AddAsync(productDto);
         return Results.Created();
     }
-    catch(ArgumentException argEx)
+    catch (ArgumentException argEx)
     {
         return Results.BadRequest(argEx.Message);
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         return Results.InternalServerError(ex.Message);
     }
@@ -169,6 +169,51 @@ app.MapPost("/product", async (ProductDto productDto, ICreateUseCase<ProductDto,
 .Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status500InternalServerError)
 .WithName("addproduct");
+
+app.MapPut("/product/{id}", async (int id, ProductDto productDto, IUpdateUseCase<ProductDto, ProductEntity> useCase) =>
+{
+    try
+    {
+        await useCase.UpdateAsync(productDto, id);
+        return Results.NoContent();
+    }
+    catch (ArgumentException argEX)
+    {
+        return Results.BadRequest(argEX.Message);
+    }
+    catch (KeyNotFoundException notFoundEx)
+    {
+        return Results.NotFound(notFoundEx.Message);
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ex.Message);
+    }
+}).Produces(StatusCodes.Status204NoContent)
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status404NotFound)
+    .Produces(StatusCodes.Status500InternalServerError)
+    .WithName("updateproduct");
+
+app.MapDelete("/product/{id}", async (int id, IDeleteUseCase useCase) =>
+{
+    try
+    {
+        await useCase.DeleteAsync(id);
+        return Results.NoContent();
+    }
+    catch (KeyNotFoundException notFoundEx)
+    {
+        return Results.NotFound(notFoundEx.Message);
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ex.Message);
+    }
+}).Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound)
+.Produces(StatusCodes.Status500InternalServerError)
+.WithName("deleteproduct");
 
 
 app.MapGet("/test", () =>
