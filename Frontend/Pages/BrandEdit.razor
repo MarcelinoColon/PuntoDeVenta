@@ -26,7 +26,8 @@ else
                 <InputText class="form-control" @bind-Value="brandEntity.Name"></InputText>
             </div>
             <div class="col-auto">
-                <button class="btn btn-primary" disabled="@isBusy">Crear</button>
+                <button class="btn btn-primary" disabled="@isBusy">Guardar</button>
+                <button type="button" class="btn btn-secondary ms-2" @onclick="Back">Volver</button>
             </div>
         </div>
     </EditForm>
@@ -66,4 +67,5 @@ else
         }
     }
     
+    private void Back() => nav.NavigateTo("/brands");
 }

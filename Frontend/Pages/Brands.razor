@@ -2,6 +2,7 @@
 @using Frontend.Client
 @inject ApiClient Api
 @inject NavigationManager nav
+@inject IJSRuntime js
 
 <h3>Marcas</h3>
 
@@ -9,13 +10,14 @@
 {
     <p>Cargando...</p>
 }
-else if(error is not null)
+else
 {
-    <div class="alert alert-danger">
-        @error
-    </div>
-}else
-{
+    if (error is not null)
+    {
+        <div class="alert alert-danger">
+            @error
+        </div>
+    }
     <EditForm Model="newBrand" OnValidSubmit="CreateAsync">
         <DataAnnotationsValidator />
         <ValidationSummary />
@@ -40,14 +42,19 @@ else if(error is not null)
             </tr>
         </thead>
         <tbody>
-            @foreach(var brand in brands)
+            @foreach (var brand in brands)
             {
                 <tr>
                     <td>@brand.Id</td>
                     <td>@brand.Name</td>
                     <td>
-                        <button class="btn btn-sm btn-secondary me-2" 
-                        @onclick='() => nav.NavigateTo($"/brands/edit/{brand.Id}/{brand.Name}")'>Editar</button>
+                        <button class="btn btn-sm btn-secondary me-2"
+                                @onclick='() => nav.NavigateTo($"/brands/edit/{brand.Id}/{brand.Name}")'>
+                            Editar
+                        </button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteAsync((int)brand.Id)">
+                            Eliminar
+                        </button>
                     </td>
                 </tr>
             }
@@ -62,6 +69,9 @@ else if(error is not null)
     private bool isBusy;
     private BrandEntity newBrand = new BrandEntity();
 
+    private async Task<bool> ConfirmAsync(string message)
+    => await js.InvokeAsync<bool>("confirm", message);
+
     protected override async Task OnInitializedAsync()
     {
         await LoadAsync();
@@ -74,7 +84,7 @@ else if(error is not null)
             error = null;
             isLoading = true;
             brands = await Api.GetbrandAsync();
-        } 
+        }
         catch (Exception ex)
         {
             error = ex.Message;
@@ -96,7 +106,28 @@ else if(error is not null)
             newBrand = new();
             await LoadAsync();
         }
-        catch(Exception ex)
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        if (!await ConfirmAsync($"¿Está seguro de que desea eliminar esta marca?")) return;
+
+        try
+        {
+            isBusy = true;
+            error = null;
+            await Api.DeletebrandAsync(id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
         {
             error = ex.Message;
         }

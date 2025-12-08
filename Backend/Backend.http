@@ -28,3 +28,24 @@ Content-Type: application/json
 ###
 
 DELETE {{Backend_HostAddress}}/brand/4
+
+###
+
+GET {{Backend_HostAddress}}/product/
+
+###
+
+GET {{Backend_HostAddress}}/product/2
+
+###
+
+POST {{Backend_HostAddress}}/product/
+Content-Type: application/json
+
+{
+  "name": "producto nuevo nuevo",
+  "cost": 10,
+  "price": 50,
+  "active": true,
+  "brandId": 1
+}
