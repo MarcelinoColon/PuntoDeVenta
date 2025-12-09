@@ -39,6 +39,15 @@ else
                     <td>@product.Id</td>
                     <td>@product.Name</td>
                     <td>
+                        <button class="btn btn-secondary btn-sm me-2"
+                                @onclick='() => Nav.NavigateTo($"/products/frmproduct/{product.Id}")'>
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger btn-sm" disabled="@isBusy"
+                        @onclick="()=>DeleteAsync(product.Id.Value)">
+                            Eliminar
+                        </button>
                     </td>
                 </tr>
             }
@@ -49,6 +58,7 @@ else
 @code {
     private IEnumerable<ProductDto> products = null;
     private bool isLoading;
+    private bool isBusy;
     private string? error = null;
 
     private async Task<bool> ConfirmAsync(string message)
@@ -76,6 +86,29 @@ else
         {
             isLoading = false;
         }
+    }
 
+    private async Task DeleteAsync(int id)
+    {
+        if(!await ConfirmAsync("Eliminar producto?"))
+        {
+            return;
+        }
+
+        try
+        {
+            isBusy = true;
+            error = null;
+            await Api.DeleteproductAsync(id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
     }
 }

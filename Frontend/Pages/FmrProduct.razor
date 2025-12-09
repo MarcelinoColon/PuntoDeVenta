@@ -1,7 +1,10 @@
 ﻿@page "/products/frmproduct"
+@page "/products/frmproduct/{Id:int}"
+@using Blazored.FluentValidation
 @using Frontend.Client
 @inject ApiClient Api
 @inject NavigationManager Nav
+
 
 
 <h3>Producto</h3>
@@ -14,6 +17,7 @@
 }
 
 <EditForm Model="productDto" OnValidSubmit="SaveAsync">
+    <FluentValidationValidator />
 
     <div>
         <InputNumber @bind-Value="productDto.Id" disabled hidden></InputNumber>
@@ -22,16 +26,19 @@
     <div class="mb-3">
         <label class="form-label">Nombre</label>
         <InputText class="form-control" @bind-Value="productDto.Name"></InputText>
+        <ValidationMessage For="()=>productDto.Name" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Costo</label>
         <InputNumber class="form-control" @bind-Value="productDto.Cost"></InputNumber>
+        <ValidationMessage For="() => productDto.Cost" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Precio</label>
         <InputNumber class="form-control" @bind-Value="productDto.Price"></InputNumber>
+        <ValidationMessage For="() => productDto.Price" />
     </div>
 
     <div class="mb-3">
@@ -56,6 +63,8 @@
 </EditForm>
 
 @code {
+    [Parameter] public int? Id{ get; set; }
+
     private bool isBusy;
     private string? error;
     private ProductDto productDto = new ProductDto();
@@ -64,6 +73,11 @@
     protected override async Task OnInitializedAsync()
     {
         await GetBrands();
+
+        if(Id != null)
+        {
+            productDto = await Api.GetproductbyidAsync(Id.Value);
+        }
     }
 
     private async Task GetBrands()
@@ -76,7 +90,16 @@
             isBusy = true;
             error = null;
 
-            await Api.AddproductAsync(productDto);
+            if(Id == null)
+            {
+                await Api.AddproductAsync(productDto);
+            }
+            else
+            {
+                await Api.UpdateproductAsync(Id.Value, productDto);
+            }
+
+
             Nav.NavigateTo("/products");
         }
         catch (Exception ex)
