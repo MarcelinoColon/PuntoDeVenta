@@ -1,0 +1,72 @@
+﻿@page "/sales"
+@using Frontend.Client
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+
+<h3>Ventas</h3>
+
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    if (error is not null)
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
+    <button class="btn btn-primary mb-3">Crear Venta</button>
+
+    <hr />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var sale in sales)
+            {
+                <tr>
+                    <td>@sale.Id</td>
+                    <td>@sale.Date</td>
+                    <td>@sale.Total.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<SaleDto> sales = null;
+    private bool isLoading;
+    private string? error = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            isLoading = true;
+            error = null;
+            sales = await Api.GetsalesAsync();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Builder;
 using Application.Product.DTOs;
 using Application.Product.UseCases;
 using Application.Product.Mappers;
+using Application.Sale.UseCases;
+using Application.Sale.DTOs;
+using Application.Sale.Mappers;
+using Backend.Endpoints;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,15 +31,21 @@ builder.Services.AddTransient<IReadRepository<ProductEntity>, ProductRepository>
 builder.Services.AddTransient<ICreateRepository<ProductEntity>, ProductRepository>();
 builder.Services.AddTransient<IUpdateRepository<ProductEntity>, ProductRepository>();
 builder.Services.AddTransient<IDeleteRepository, ProductRepository>();
+builder.Services.AddTransient<ICreateRepository<SaleEntity>, CreateSaleRepository>();
+builder.Services.AddTransient<IReadRepository<SaleEntity>, ReadSaleRepositoy>();
 
 builder.Services.AddTransient<IUseCase<BrandEntity>, BrandUseCase>();
 builder.Services.AddTransient<IReadUseCase<ProductDto, ProductEntity>, ProductUseCase>();
 builder.Services.AddTransient<ICreateUseCase<ProductDto, ProductEntity>, CreateProductUseCase>();
 builder.Services.AddTransient<IUpdateUseCase<ProductDto, ProductEntity>, UpdateProductUseCase>();
 builder.Services.AddTransient<IDeleteUseCase, DeleteProductUseCase>();
+builder.Services.AddTransient<ICreateUseCase<SaleDto, SaleEntity>, CreateSaleUseCase>();
+builder.Services.AddTransient<IReadUseCase<SaleDto, SaleEntity>, ReadSaleUseCase>();
 
 builder.Services.AddTransient<IMapper<ProductEntity, ProductDto>, ProductEntityToDtoMapper>();
 builder.Services.AddTransient<IMapper<ProductDto, ProductEntity>, ProductDtoToEntityMapper>();
+builder.Services.AddTransient<IMapper<SaleDto, SaleEntity>, SaleDtoToEntityMapper>();
+builder.Services.AddTransient<IMapper<SaleEntity, SaleDto>, SaleEntityToDtoMapper>();
 
 //swagger
 
@@ -67,6 +77,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors(FrontendPolicy);
+
+//Endpoints de Ventas
+app.MapSaleEndpoints();
 
 
 // Brand Endpoints
@@ -222,5 +235,7 @@ app.MapGet("/test", () =>
 }).WithName("test");
 
 app.Run();
+
+
 
 
