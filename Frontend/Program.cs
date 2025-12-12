@@ -14,6 +14,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped<IValidator<ProductDto>, ProductDtoValidator>();
+builder.Services.AddScoped<IValidator<SaleDto>, SaleDtoValidator>();
 
 var culture = new CultureInfo("es-DO");
 CultureInfo.DefaultThreadCurrentCulture = culture;

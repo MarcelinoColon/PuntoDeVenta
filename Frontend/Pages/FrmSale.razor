@@ -1,0 +1,179 @@
+﻿@page "/sales/frmsale"
+@using Frontend.Client
+@inject ApiClient Api
+@inject NavigationManager Nav
+@using Blazored.FluentValidation
+
+
+<h3>Crear Venta</h3>
+
+@if (error is not null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+<EditForm Model="saleDto" OnValidSubmit="SaveAsync">
+    <FluentValidationValidator />
+    <ValidationSummary />
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Fecha:</label>
+            <input type="datetime-local" class="form-control" @bind="saleDto.Date" />
+        </div>
+    </div>
+    <div class="row g-3 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label">Producto</label>
+            <InputSelect class="form-select" @bind-Value="saleDetailDto.ProductId"
+                         @bind-Value:after="OnProductChanged">
+                <option value="">-- Selecciona --</option>
+                @foreach (var product in products)
+                {
+                    <option value="@product.Id">@product.Name (@product.Price.ToString("C"))</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Cantidad</label>
+            <InputNumber class="form-control" @bind-Value="saleDetailDto.Quantity" />
+        </div>
+
+        <div class="col-md-2">
+            <button type="button" class="btn btn-primary" @onclick="AddSaleDetail">Agregar</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Importe</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (saleDto.Details == null || saleDto.Details.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-muted">Sin productos</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var saleDetail in saleDto.Details)
+                    {
+                        var product = products.FirstOrDefault(p => p.Id == saleDetail.ProductId);
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>@saleDetail.Quantity</td>
+                            <td>@saleDetail.UnitPrice.ToString("C")</td>
+                            <td>
+                                @((saleDetail.Quantity * saleDetail.UnitPrice).ToString("C"))
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        title="Eliminar" @onclick="@(() => RemoveItem(saleDetail))">
+                                    &times;
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <button class="btn btn-primary" type="submit" disabled="@isBusy">Guardar</button>
+        <button class="btn btn-secondary" type="button" @onclick="Back">Regresar</button>
+    </div>
+
+
+</EditForm>
+
+@code {
+    private bool isBusy;
+    private string? error;
+    private SaleDto saleDto = new SaleDto();
+    private IEnumerable<ProductDto> products = new List<ProductDto>();
+    private SaleDetailDto saleDetailDto = new SaleDetailDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        saleDto.Date = DateTime.Now;
+        await GetProducts();
+    }
+
+    private async Task SaveAsync()
+    {
+        if (saleDto is null)
+            return;
+
+        try
+        {
+            isBusy = true;
+            error = null;
+            await Api.AddsaleAsync(saleDto);
+
+            Nav.NavigateTo("/sales");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void OnProductChanged()
+    {
+        if (saleDetailDto.ProductId is int id)
+        {
+            var p = products.FirstOrDefault(x => x.Id == id);
+            @if (p is not null)
+            {
+                saleDetailDto.UnitPrice = p.Price;
+            }
+        }
+    }
+
+    private void AddSaleDetail()
+    {
+        error = null;
+        if (saleDetailDto.ProductId == 0 || saleDetailDto.Quantity <= 0)
+        {
+            error = "Selecciona un producto y una cantidad valida mayor a 0";
+            return;
+        }
+
+        if (saleDto.Details == null)
+            saleDto.Details = new List<SaleDetailDto>();
+
+        saleDto.Details.Add(new SaleDetailDto
+        {
+            ProductId = saleDetailDto.ProductId,
+            Quantity = saleDetailDto.Quantity,
+            UnitPrice = saleDetailDto.UnitPrice
+
+        });
+
+        saleDetailDto = new();
+    }
+
+    private async Task GetProducts()
+    => products = await Api.GetproductAsync();
+
+    private void RemoveItem(SaleDetailDto sd)
+    {
+        saleDto.Details.Remove(sd);
+    }
+
+    private void Back()
+    => Nav.NavigateTo("/sales");
+}
